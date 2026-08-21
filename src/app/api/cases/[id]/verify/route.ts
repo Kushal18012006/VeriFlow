@@ -57,10 +57,22 @@ export async function POST(
     } catch (err: any) {
       console.error('Background verification failed completely:', err);
       // Failsafe state
-      const targetCase = SERVER_CASES_STORE.find(c => c.id === caseId);
-      if (targetCase && targetCase.latest_verification_run) {
-        targetCase.latest_verification_run.status = 'FAILED';
-        targetCase.status = 'HUMAN_REVIEW';
+      const newCaseStatus = 'HUMAN_REVIEW';
+      
+      const supabase = getSupabaseClient();
+      if (supabase) {
+        try {
+          await supabase.from('cases').update({ status: newCaseStatus }).eq('id', caseId);
+          await supabase.from('verification_runs').update({ status: 'FAILED' }).eq('id', runId);
+        } catch (e) {
+          console.error('Failsafe DB update error:', e);
+        }
+      } else {
+        const memoryCase = SERVER_CASES_STORE?.find((c: any) => c.id === caseId);
+        if (memoryCase && memoryCase.latest_verification_run) {
+          memoryCase.latest_verification_run.status = 'FAILED';
+          memoryCase.status = newCaseStatus;
+        }
       }
       return NextResponse.json({ error: 'Verification failed critically' }, { status: 500 });
     }
@@ -70,20 +82,14 @@ export async function POST(
     // Override ID to match initial run ID
     run.id = runId;
 
-    // Update memory store
-    const memoryCase = SERVER_CASES_STORE.find(c => c.id === caseId);
-    if (!memoryCase) {
-      return NextResponse.json({ error: 'Case missing in memory' }, { status: 500 });
-    }
-
-    const prevStatus = memoryCase.status;
-    memoryCase.status = newCaseStatus;
-    memoryCase.latest_verification_run = run;
-    memoryCase.updated_at = new Date().toISOString();
+    const prevStatus = currentCase.status;
+    currentCase.status = newCaseStatus;
+    currentCase.latest_verification_run = run;
+    currentCase.updated_at = new Date().toISOString();
 
     const completionAudit: AuditLog = {
       id: crypto.randomUUID(),
-      case_id: memoryCase.id,
+      case_id: currentCase.id,
       actor_id: 'SYSTEM_VERIFIER',
       action: 'VERIFICATION_COMPLETED',
       previous_state: prevStatus,
@@ -96,7 +102,9 @@ export async function POST(
       },
       created_at: new Date().toISOString(),
     };
-    memoryCase.audit_logs!.push(completionAudit);
+
+    if (!currentCase.audit_logs) currentCase.audit_logs = [];
+    currentCase.audit_logs.push(completionAudit);
 
     // Update Supabase if connected
     const supabase = getSupabaseClient();
@@ -104,8 +112,8 @@ export async function POST(
       try {
         await supabase.from('cases').update({
           status: newCaseStatus,
-          updated_at: memoryCase.updated_at,
-        }).eq('id', memoryCase.id);
+          updated_at: currentCase.updated_at,
+        }).eq('id', currentCase.id);
 
         await supabase.from('verification_runs').update({
           status: run.status,
@@ -132,7 +140,7 @@ export async function POST(
 
         await supabase.from('audit_logs').insert({
           id: completionAudit.id,
-          case_id: memoryCase.id,
+          case_id: currentCase.id,
           actor_id: completionAudit.actor_id,
           action: completionAudit.action,
           previous_state: completionAudit.previous_state,
@@ -142,6 +150,15 @@ export async function POST(
         });
       } catch (err) {
         console.error('Async DB update failed:', err);
+      }
+    } else {
+      // Fallback for demo mode
+      const memoryCase = SERVER_CASES_STORE?.find((c: any) => c.id === caseId);
+      if (memoryCase) {
+        memoryCase.status = newCaseStatus;
+        memoryCase.latest_verification_run = run;
+        memoryCase.updated_at = currentCase.updated_at;
+        memoryCase.audit_logs!.push(completionAudit);
       }
     }
 

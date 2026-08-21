@@ -276,7 +276,11 @@ export async function getAllCases(params?: {
       if (params?.createdBy) query = query.eq('created_by', params.createdBy);
 
       const { data, error } = await query;
-      if (!error && data && data.length > 0) {
+      if (error) {
+        console.error('Supabase fetch error in getAllCases:', error);
+        throw error;
+      }
+      if (data && data.length > 0) {
         return data.map((c: any) => ({
           ...c,
           original_evidence: c.original_evidence?.filter((e: any) => e.type === 'ORIGINAL_REPORT') || [],
@@ -284,11 +288,14 @@ export async function getAllCases(params?: {
           latest_verification_run: c.verification_runs?.[0] || undefined,
         })).sort((a: Case, b: Case) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       }
+      return [];
     } catch (e) {
-      console.warn('Supabase fetch fallback to server store:', e);
+      console.error('Supabase fetch failed:', e);
+      throw e;
     }
   }
 
+  // Fallback for local demo mode only
   let cases = [...SERVER_CASES_STORE];
   if (params?.status) cases = cases.filter(c => c.status === params.status);
   if (params?.category) cases = cases.filter(c => c.category === params.category);
@@ -333,11 +340,14 @@ export async function getCaseById(id: string): Promise<Case | null> {
           } : undefined,
         };
       }
+      return null;
     } catch (e) {
-      console.warn('Supabase fetch by ID fallback to server store:', e);
+      console.error('Supabase fetch by ID error:', e);
+      return null;
     }
   }
 
+  // Fallback for local demo mode only
   const found = SERVER_CASES_STORE.find(c => c.id === id);
   return found ? JSON.parse(JSON.stringify(found)) : null;
 }
@@ -481,12 +491,15 @@ export async function createNewCase(data: {
         console.error('Supabase Audit Log Insert Error:', auditErr);
         throw new Error(`Supabase Audit Log Insert Failed: ${auditErr.message}`);
       }
+
+      return newCase;
     } catch (err: any) {
-      console.warn('Supabase DB operation warning (falling back to server global store):', err.message || err);
+      console.error('Supabase DB operation FAILED:', err.message || err);
+      throw err;
     }
   }
 
-  // 5. Always persist to server global store for instant availability
+  // 5. Only persist to server global store if Supabase is NOT configured (demo mode)
   SERVER_CASES_STORE.unshift(newCase);
   return newCase;
 }
@@ -572,14 +585,6 @@ export async function submitResolutionClaim(data: {
   }
   targetCase.audit_logs.push(auditLog);
 
-  // Sync server global store initially
-  const idx = SERVER_CASES_STORE.findIndex(c => c.id === targetCase.id);
-  if (idx !== -1) {
-    SERVER_CASES_STORE[idx] = targetCase;
-  } else {
-    SERVER_CASES_STORE.unshift(targetCase);
-  }
-
   // Supabase update for initial submission if connected
   const supabase = getSupabaseClient();
   if (supabase) {
@@ -622,9 +627,20 @@ export async function submitResolutionClaim(data: {
         details_json: auditLog.details_json,
         created_at: now,
       });
+
+      return { caseItem: targetCase, run: initialRun };
     } catch (err) {
-      console.warn('Supabase initial submission update warning:', err);
+      console.error('Supabase initial submission update FAILED:', err);
+      throw err;
     }
+  }
+
+  // Only sync to server store if Supabase is NOT configured (demo mode)
+  const idx = SERVER_CASES_STORE.findIndex(c => c.id === targetCase.id);
+  if (idx !== -1) {
+    SERVER_CASES_STORE[idx] = targetCase;
+  } else {
+    SERVER_CASES_STORE.unshift(targetCase);
   }
 
   return { caseItem: targetCase, run: initialRun };

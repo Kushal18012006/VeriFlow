@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getCaseById, SERVER_CASES_STORE, getSupabaseClient } from '@/lib/db/cases';
+import { getCaseById, getSupabaseClient } from '@/lib/db/cases';
 import { VerificationEngine } from '@/lib/verification/engine';
 import { AuditLog } from '@/lib/domain/types';
 
@@ -66,12 +66,6 @@ export async function POST(
           await supabase.from('verification_runs').update({ status: 'FAILED' }).eq('id', runId);
         } catch (e) {
           console.error('Failsafe DB update error:', e);
-        }
-      } else {
-        const memoryCase = SERVER_CASES_STORE?.find((c: any) => c.id === caseId);
-        if (memoryCase && memoryCase.latest_verification_run) {
-          memoryCase.latest_verification_run.status = 'FAILED';
-          memoryCase.status = newCaseStatus;
         }
       }
       return NextResponse.json({ error: 'Verification failed critically' }, { status: 500 });
@@ -150,15 +144,6 @@ export async function POST(
         });
       } catch (err) {
         console.error('Async DB update failed:', err);
-      }
-    } else {
-      // Fallback for demo mode
-      const memoryCase = SERVER_CASES_STORE?.find((c: any) => c.id === caseId);
-      if (memoryCase) {
-        memoryCase.status = newCaseStatus;
-        memoryCase.latest_verification_run = run;
-        memoryCase.updated_at = currentCase.updated_at;
-        memoryCase.audit_logs!.push(completionAudit);
       }
     }
 

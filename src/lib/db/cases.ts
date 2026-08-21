@@ -13,15 +13,15 @@ const INITIAL_SEED_CASES: Case[] = [
     latitude: 37.774929,
     longitude: -122.419416,
     status: 'CLAIMED_RESOLVED',
-    created_by: '11111111-1111-1111-1111-111111111111',
-    assigned_authority_id: '22222222-2222-2222-2222-222222222222',
+    created_by: 'd8c7ca8b-661c-4be8-9211-1770983f440a',
+    assigned_authority_id: '329dfd8f-d0c4-4e71-93e9-0a37f72d816b',
     created_at: new Date(Date.now() - 86400000 * 3).toISOString(),
     updated_at: new Date(Date.now() - 3600000 * 2).toISOString(),
     original_evidence: [
       {
         id: 'e1111111-1111-1111-1111-111111111111',
         case_id: 'c1111111-1111-1111-1111-111111111111',
-        uploaded_by: '11111111-1111-1111-1111-111111111111',
+        uploaded_by: 'd8c7ca8b-661c-4be8-9211-1770983f440a',
         type: 'ORIGINAL_REPORT',
         file_url: '/demo/pothole_evidence.svg',
         storage_path: 'cases/c1111111-1111-1111-1111-111111111111/original_1.svg',
@@ -42,7 +42,7 @@ const INITIAL_SEED_CASES: Case[] = [
       {
         id: 'e2222222-2222-2222-2222-222222222222',
         case_id: 'c1111111-1111-1111-1111-111111111111',
-        uploaded_by: '22222222-2222-2222-2222-222222222222',
+        uploaded_by: '329dfd8f-d0c4-4e71-93e9-0a37f72d816b',
         type: 'RESOLUTION_PROOF',
         file_url: '/demo/pothole_repaired.svg',
         storage_path: 'cases/c1111111-1111-1111-1111-111111111111/resolution_1.svg',
@@ -63,7 +63,7 @@ const INITIAL_SEED_CASES: Case[] = [
       {
         id: 'a1111111-1111-1111-1111-111111111111',
         case_id: 'c1111111-1111-1111-1111-111111111111',
-        actor_id: '11111111-1111-1111-1111-111111111111',
+        actor_id: 'd8c7ca8b-661c-4be8-9211-1770983f440a',
         action: 'CASE_CREATED',
         new_state: 'OPEN',
         details_json: { notes: 'Citizen reported deep pothole hazard.' },
@@ -72,7 +72,7 @@ const INITIAL_SEED_CASES: Case[] = [
       {
         id: 'a2222222-2222-2222-2222-222222222222',
         case_id: 'c1111111-1111-1111-1111-111111111111',
-        actor_id: '22222222-2222-2222-2222-222222222222',
+        actor_id: '329dfd8f-d0c4-4e71-93e9-0a37f72d816b',
         action: 'UNDER_REVIEW_ASSIGNED',
         previous_state: 'OPEN',
         new_state: 'UNDER_REVIEW',
@@ -82,7 +82,7 @@ const INITIAL_SEED_CASES: Case[] = [
       {
         id: 'a3333333-3333-3333-3333-333333333333',
         case_id: 'c1111111-1111-1111-1111-111111111111',
-        actor_id: '22222222-2222-2222-2222-222222222222',
+        actor_id: '329dfd8f-d0c4-4e71-93e9-0a37f72d816b',
         action: 'RESOLUTION_CLAIMED',
         previous_state: 'UNDER_REVIEW',
         new_state: 'CLAIMED_RESOLVED',
@@ -100,15 +100,15 @@ const INITIAL_SEED_CASES: Case[] = [
     latitude: 37.7833,
     longitude: -122.4167,
     status: 'HUMAN_REVIEW',
-    created_by: '11111111-1111-1111-1111-111111111111',
-    assigned_authority_id: '22222222-2222-2222-2222-222222222222',
+    created_by: 'd8c7ca8b-661c-4be8-9211-1770983f440a',
+    assigned_authority_id: '329dfd8f-d0c4-4e71-93e9-0a37f72d816b',
     created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
     updated_at: new Date(Date.now() - 86400000 * 1).toISOString(),
     original_evidence: [
       {
         id: 'e3333333-3333-3333-3333-333333333333',
         case_id: 'c2222222-2222-2222-2222-222222222222',
-        uploaded_by: '11111111-1111-1111-1111-111111111111',
+        uploaded_by: 'd8c7ca8b-661c-4be8-9211-1770983f440a',
         type: 'ORIGINAL_REPORT',
         file_url: '/demo/streetlight_evidence.svg',
         storage_path: 'cases/c2222222-2222-2222-2222-222222222222/original_1.svg',
@@ -126,7 +126,7 @@ const INITIAL_SEED_CASES: Case[] = [
       {
         id: 'e4444444-4444-4444-4444-444444444444',
         case_id: 'c2222222-2222-2222-2222-222222222222',
-        uploaded_by: '22222222-2222-2222-2222-222222222222',
+        uploaded_by: '329dfd8f-d0c4-4e71-93e9-0a37f72d816b',
         type: 'RESOLUTION_PROOF',
         file_url: '/demo/streetlight_repaired.svg',
         storage_path: 'cases/c2222222-2222-2222-2222-222222222222/resolution_1.svg',
@@ -177,7 +177,7 @@ const INITIAL_SEED_CASES: Case[] = [
       {
         id: 'a4444444-4444-4444-4444-444444444444',
         case_id: 'c2222222-2222-2222-2222-222222222222',
-        actor_id: '11111111-1111-1111-1111-111111111111',
+        actor_id: 'd8c7ca8b-661c-4be8-9211-1770983f440a',
         action: 'CASE_CREATED',
         new_state: 'OPEN',
         created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
@@ -185,7 +185,7 @@ const INITIAL_SEED_CASES: Case[] = [
       {
         id: 'a5555555-5555-5555-5555-555555555555',
         case_id: 'c2222222-2222-2222-2222-222222222222',
-        actor_id: '22222222-2222-2222-2222-222222222222',
+        actor_id: '329dfd8f-d0c4-4e71-93e9-0a37f72d816b',
         action: 'VERIFICATION_EXECUTED',
         previous_state: 'CLAIMED_RESOLVED',
         new_state: 'HUMAN_REVIEW',
@@ -203,14 +203,14 @@ const INITIAL_SEED_CASES: Case[] = [
     latitude: 37.769,
     longitude: -122.448,
     status: 'OPEN',
-    created_by: '11111111-1111-1111-1111-111111111111',
+    created_by: 'd8c7ca8b-661c-4be8-9211-1770983f440a',
     created_at: new Date(Date.now() - 86400000 * 1).toISOString(),
     updated_at: new Date(Date.now() - 86400000 * 1).toISOString(),
     original_evidence: [
       {
         id: 'e5555555-5555-5555-5555-555555555555',
         case_id: 'c3333333-3333-3333-3333-333333333333',
-        uploaded_by: '11111111-1111-1111-1111-111111111111',
+        uploaded_by: 'd8c7ca8b-661c-4be8-9211-1770983f440a',
         type: 'ORIGINAL_REPORT',
         file_url: '/demo/drainage_evidence.svg',
         storage_path: 'cases/c3333333-3333-3333-3333-333333333333/original_1.svg',
@@ -229,7 +229,7 @@ const INITIAL_SEED_CASES: Case[] = [
       {
         id: 'a6666666-6666-6666-6666-666666666666',
         case_id: 'c3333333-3333-3333-3333-333333333333',
-        actor_id: '11111111-1111-1111-1111-111111111111',
+        actor_id: 'd8c7ca8b-661c-4be8-9211-1770983f440a',
         action: 'CASE_CREATED',
         new_state: 'OPEN',
         created_at: new Date(Date.now() - 86400000 * 1).toISOString(),

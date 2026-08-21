@@ -238,15 +238,6 @@ const INITIAL_SEED_CASES: Case[] = [
   },
 ];
 
-declare global {
-  var _veriflow_cases_store: Case[] | undefined;
-}
-
-if (!globalThis._veriflow_cases_store) {
-  globalThis._veriflow_cases_store = [...INITIAL_SEED_CASES];
-}
-
-export const SERVER_CASES_STORE = globalThis._veriflow_cases_store;
 
 export function getSupabaseClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -295,8 +286,8 @@ export async function getAllCases(params?: {
     }
   }
 
-  // Fallback for local demo mode only
-  let cases = [...SERVER_CASES_STORE];
+  // Fallback for local demo mode only (Read-only Seeded Data)
+  let cases = [...INITIAL_SEED_CASES];
   if (params?.status) cases = cases.filter(c => c.status === params.status);
   if (params?.category) cases = cases.filter(c => c.category === params.category);
   if (params?.createdBy) cases = cases.filter(c => c.created_by === params.createdBy);
@@ -347,8 +338,8 @@ export async function getCaseById(id: string): Promise<Case | null> {
     }
   }
 
-  // Fallback for local demo mode only
-  const found = SERVER_CASES_STORE.find(c => c.id === id);
+  // Fallback for local demo mode only (Read-only Seeded Data)
+  const found = INITIAL_SEED_CASES.find(c => c.id === id);
   return found ? JSON.parse(JSON.stringify(found)) : null;
 }
 
@@ -498,10 +489,7 @@ export async function createNewCase(data: {
       throw err;
     }
   }
-
-  // 5. Only persist to server global store if Supabase is NOT configured (demo mode)
-  SERVER_CASES_STORE.unshift(newCase);
-  return newCase;
+  throw new Error('Supabase configuration is missing. Database connection is required to create a case.');
 }
 
 export async function submitResolutionClaim(data: {
@@ -634,14 +622,5 @@ export async function submitResolutionClaim(data: {
       throw err;
     }
   }
-
-  // Only sync to server store if Supabase is NOT configured (demo mode)
-  const idx = SERVER_CASES_STORE.findIndex(c => c.id === targetCase.id);
-  if (idx !== -1) {
-    SERVER_CASES_STORE[idx] = targetCase;
-  } else {
-    SERVER_CASES_STORE.unshift(targetCase);
-  }
-
-  return { caseItem: targetCase, run: initialRun };
+  throw new Error('Supabase configuration is missing. Database connection is required to submit a resolution.');
 }

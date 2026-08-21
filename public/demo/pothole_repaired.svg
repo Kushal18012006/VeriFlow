@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <pattern id="asphaltOld" width="20" height="20" patternUnits="userSpaceOnUse">
+      <rect width="20" height="20" fill="#1e293b"/>
+      <circle cx="3" cy="5" r="1.5" fill="#334155" opacity="0.6"/>
+      <circle cx="12" cy="14" r="1.2" fill="#475569" opacity="0.5"/>
+    </pattern>
+    <pattern id="asphaltNew" width="15" height="15" patternUnits="userSpaceOnUse">
+      <rect width="15" height="15" fill="#0f172a"/>
+      <circle cx="4" cy="4" r="1" fill="#334155" opacity="0.8"/>
+      <circle cx="10" cy="10" r="1.5" fill="#1e293b" opacity="0.9"/>
+    </pattern>
+  </defs>
+
+  <!-- Old Road Base -->
+  <rect width="800" height="500" fill="url(#asphaltOld)"/>
+
+  <!-- Curb Edge -->
+  <rect x="0" y="0" width="800" height="40" fill="#475569"/>
+  <rect x="0" y="36" width="800" height="8" fill="#334155"/>
+
+  <!-- Yellow Lane Marking -->
+  <line x1="0" y1="460" x2="800" y2="460" stroke="#eab308" stroke-width="12" stroke-dasharray="80 40"/>
+
+  <!-- Fresh Asphalt Repair Patch Shape -->
+  <path d="M 240 210 C 300 170, 490 180, 560 220 C 620 260, 580 350, 510 380 C 440 410, 300 390, 240 340 C 190 290, 210 240, 240 210 Z" fill="url(#asphaltNew)" stroke="#020617" stroke-width="6"/>
+
+  <!-- Black Bitumen Sealer Border around Patch -->
+  <path d="M 240 210 C 300 170, 490 180, 560 220 C 620 260, 580 350, 510 380 C 440 410, 300 390, 240 340 C 190 290, 210 240, 240 210 Z" fill="none" stroke="#020617" stroke-width="12" opacity="0.75"/>
+
+  <!-- Roller Compaction Marks -->
+  <line x1="260" y1="260" x2="520" y2="260" stroke="#1e293b" stroke-width="4" opacity="0.5"/>
+  <line x1="270" y1="300" x2="510" y2="300" stroke="#1e293b" stroke-width="4" opacity="0.5"/>
+  <line x1="280" y1="340" x2="490" y2="340" stroke="#1e293b" stroke-width="4" opacity="0.5"/>
+
+  <!-- Evidence Tag HUD overlay -->
+  <rect x="20" y="440" width="370" height="40" rx="6" fill="#020617" opacity="0.85" stroke="#10b981" stroke-width="1"/>
+  <text x="35" y="465" font-family="monospace" font-size="13" font-weight="bold" fill="#10b981">
+    PROOF #01 • REPAIRED ASPHALT COLD PATCH
+  </text>
+</svg>

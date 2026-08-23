@@ -1,10 +1,12 @@
 import { notFound } from 'next/navigation';
+import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { getCaseById } from '@/lib/db/cases';
 import StatusBadge from '@/components/ui/StatusBadge';
 import DecisionWhySection from '@/components/cases/DecisionWhySection';
 import EvidenceInspector from '@/components/cases/EvidenceInspector';
 import AuditTimeline from '@/components/cases/AuditTimeline';
+import AuthorityActionPanel from '@/components/cases/AuthorityActionPanel';
 import { MapPin, Calendar, ArrowLeft, Building2 } from 'lucide-react';
 import { formatDateTimeUTC } from '@/lib/utils/format';
 import ClientRefresh from './ClientRefresh';
@@ -20,6 +22,9 @@ interface CaseDetailPageProps {
 
 export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
   const caseItem = await getCaseById(params.id);
+  
+  const cookieStore = cookies();
+  const currentRole = cookieStore.get('veriflow_role')?.value || 'CITIZEN';
 
   if (!caseItem) {
     notFound();
@@ -120,6 +125,9 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
         <h2 className="text-[18px] font-semibold text-slate-100 mb-4">Decision history</h2>
         <AuditTimeline logs={caseItem.audit_logs || []} />
       </div>
+
+      {/* Authority Actions */}
+      {currentRole === 'AUTHORITY' && <AuthorityActionPanel caseItem={caseItem} />}
 
       {caseItem.status === 'VERIFYING' && <ClientRefresh caseId={caseItem.id} />}
     </div>

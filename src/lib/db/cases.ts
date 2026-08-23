@@ -272,12 +272,17 @@ export async function getAllCases(params?: {
         throw error;
       }
       if (data && data.length > 0) {
-        return data.map((c: any) => ({
-          ...c,
-          original_evidence: c.original_evidence?.filter((e: any) => e.type === 'ORIGINAL_REPORT') || [],
-          resolution_evidence: c.original_evidence?.filter((e: any) => e.type === 'RESOLUTION_PROOF') || [],
-          latest_verification_run: c.verification_runs?.[0] || undefined,
-        })).sort((a: Case, b: Case) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        return data.map((c: any) => {
+          const sortedRuns = (c.verification_runs || []).sort(
+            (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+          return {
+            ...c,
+            original_evidence: c.original_evidence?.filter((e: any) => e.type === 'ORIGINAL_REPORT') || [],
+            resolution_evidence: c.original_evidence?.filter((e: any) => e.type === 'RESOLUTION_PROOF') || [],
+            latest_verification_run: sortedRuns[0] || undefined,
+          };
+        }).sort((a: Case, b: Case) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       }
       return [];
     } catch (e) {
@@ -321,13 +326,18 @@ export async function getCaseById(id: string): Promise<Case | null> {
 
       if (!error && data) {
         const evidenceList = data.evidence || [];
+        const sortedRuns = (data.verification_runs || []).sort(
+          (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+        const latestRun = sortedRuns[0];
+        
         return {
           ...data,
           original_evidence: evidenceList.filter((e: any) => e.type === 'ORIGINAL_REPORT'),
           resolution_evidence: evidenceList.filter((e: any) => e.type === 'RESOLUTION_PROOF'),
-          latest_verification_run: data.verification_runs?.[0] ? {
-            ...data.verification_runs[0],
-            findings: data.verification_runs[0].findings || [],
+          latest_verification_run: latestRun ? {
+            ...latestRun,
+            findings: latestRun.findings || [],
           } : undefined,
         };
       }
@@ -623,4 +633,37 @@ export async function submitResolutionClaim(data: {
     }
   }
   throw new Error('Supabase configuration is missing. Database connection is required to submit a resolution.');
+}
+
+export async function claimCase(caseId: string, authorityId: string): Promise<Case> {
+  const supabase = getSupabaseClient();
+  if (!supabase) throw new Error('Supabase configuration is missing.');
+
+  const now = new Date().toISOString();
+  
+  const { data, error } = await supabase
+    .from('cases')
+    .update({ assigned_authority_id: authorityId, status: 'UNDER_REVIEW', updated_at: now })
+    .eq('id', caseId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Supabase Case Claim Failed:', error);
+    throw new Error('Failed to claim case');
+  }
+
+  await supabase.from('audit_logs').insert({
+    id: crypto.randomUUID(),
+    case_id: caseId,
+    actor_id: authorityId,
+    action: 'UNDER_REVIEW_ASSIGNED',
+    previous_state: 'OPEN',
+    new_state: 'UNDER_REVIEW',
+    created_at: now,
+  });
+
+  const c = await getCaseById(caseId);
+  if (!c) throw new Error('Case not found');
+  return c;
 }

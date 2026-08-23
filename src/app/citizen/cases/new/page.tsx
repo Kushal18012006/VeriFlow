@@ -8,7 +8,7 @@ import SafeImage from '@/components/ui/SafeImage';
 const PRESET_EVIDENCE_SAMPLES = [
   {
     label: 'Sample Pothole Evidence',
-    url: '/demo/pothole_evidence.svg',
+    url: '/demo/pothole_evidence.png',
   },
   {
     label: 'Sample Streetlight Damage Evidence',

@@ -43,16 +43,16 @@ Case Category: ${request.category}
 Case Description: ${request.caseDescription}
 
 Your task is to determine if the reported issue has been resolved.
-Return a STRICT JSON object matching this structure:
+Return a STRICT JSON object matching exactly this structure:
 {
   "isResolved": boolean, // true ONLY if fully resolved
   "resolutionLevel": "FULL" | "PARTIAL" | "NONE" | "INCONCLUSIVE",
   "visualCoverageSufficient": boolean,
-  "detectedChanges": string[], // list of specific observations
+  "detectedChanges": string[], // list of specific observations (keep brief)
   "residualDamage": boolean, // true if issue remains partially
-  "explanation": string // clear, human-readable justification for your findings
+  "explanation": string // concise, human-readable justification (max 2 sentences)
 }
-DO NOT include any markdown blocks or other text outside the JSON object.
+IMPORTANT: DO NOT wrap the response in any outer objects like "comparison". Return ONLY the exact flat JSON object shown above. Do not include markdown blocks.
 `,
       },
     ];
@@ -88,7 +88,7 @@ DO NOT include any markdown blocks or other text outside the JSON object.
           model: model,
           messages: [{ role: 'user', content }],
           response_format: { type: 'json_object' },
-          max_tokens: 1000,
+          max_tokens: 4096,
         }),
       });
 
@@ -105,7 +105,20 @@ DO NOT include any markdown blocks or other text outside the JSON object.
         throw new Error('Empty response from Vision API');
       }
 
-      const parsed: RawVisionResponse = JSON.parse(rawOutput);
+      let parsed: RawVisionResponse;
+      try {
+        parsed = JSON.parse(rawOutput);
+      } catch (parseError) {
+        console.error('Vision API returned invalid or truncated JSON:', rawOutput);
+        return {
+          isResolved: false,
+          supportConfidence: 0,
+          detectedChanges: [],
+          visualCoverageSufficient: false,
+          explanation: 'AI visual analysis service returned malformed or truncated response. Human review required.',
+          rawModelResponse: { rawOutput } as any,
+        };
+      }
 
       // Determine evidence-support score from observations
       let supportConfidence = 0.5;

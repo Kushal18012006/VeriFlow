@@ -1,7 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { createNewCase, submitResolutionClaim } from '@/lib/db/cases';
+import { createNewCase, submitResolutionClaim, claimCase } from '@/lib/db/cases';
 import { CreateCaseSchema, ClaimResolutionSchema } from '@/lib/validation/schemas';
 import { DEMO_CITIZEN_USER, DEMO_AUTHORITY_USER } from '@/lib/auth/session';
 
@@ -63,4 +63,10 @@ export async function submitClaimServerAction(formData: FormData) {
   }).catch(err => console.error('Failed to trigger background verification:', err));
 
   redirect(`/cases/${result.caseItem.id}`);
+}
+
+export async function claimCaseServerAction(formData: FormData) {
+  const case_id = formData.get('case_id') as string;
+  await claimCase(case_id, DEMO_AUTHORITY_USER.id);
+  redirect(`/cases/${case_id}`);
 }
